@@ -126,21 +126,20 @@ class Lifetable(object):
 #%%
 
 def Annuity(lifetable, x, n, interest_rates, m, k=1, power=1, payment='due'):
-    pass
-#    #computation of quantities, assuming fractional payments
-#    n = np.min((lifetable.omega()-x-m)*k, n*k)
-#    cash_flows = np.array(1/k).repeat(n*k)
-#    probs = lifetable.DataFrame()['px'].loc[x:x+n+1]
-#    time_ids = np.arange(0, (n)/k, 1/k) + m 
-#    
-#    if payment == "immediate":
-#        time_ids = time_ids + 1/k
-#
-#    return present_value(cash_flows=cash_flows,
-#                         time_ids=time_ids,
-#                         interest_rates=i,
-#                         probs=probs,
-#                         power=power)
+    #computation of quantities, assuming fractional payments
+    n = np.min((lifetable.omega()-x-m)*k, n*k)
+    cash_flows = np.array(1/k).repeat(n*k)
+    probs = lifetable.DataFrame()['px'].loc[x:x+n+1]
+    time_ids = np.arange(0, (n)/k, 1/k) + m 
+    
+    if payment == "immediate":
+        time_ids = time_ids + 1/k
+
+    return present_value(cash_flows=cash_flows,
+                         time_ids=time_ids,
+                         interest_rates=i,
+                         probs=probs,
+                         power=power)
 #      out <-
 #        presentValue(
 #          cashFlows = payments, timeIds = times, interestRates = interest, probabilities =
