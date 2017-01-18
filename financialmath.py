@@ -115,13 +115,19 @@ class Lifetable(object):
         return pd.DataFrame(od, columns=list(od.keys()), index=od['x'])
 #%%
 
-def Annuity(n, interest_rates, m, age=None, lifetable=None, 
+def annuity(n, interest_rates, m, age=None, lifetable=None, 
             k=1, power=1, payment='due'):
+    
     #computation of quantities, assuming fractional payments
     if (age is not None) & (lifetable is not None):
-        n = np.min((lifetable.omega()-age-m)*k, n*k)
-        probs = lifetable.DataFrame()['px'].loc[x:x+n+1]
+        if k != lifetable._k:
+            raise ValueError('The fractional timestep k is not the same as the '
+                             'lifetable.')
+            
+        n = np.min([(lifetable.omega()-age-m)*k, n*k])
+        probs = lifetable.ptx(1)[age:age+n]
     else:
+        n = n*k
         probs = np.array([1])
     
     cash_flows = np.array(1/k).repeat(n)
@@ -132,65 +138,6 @@ def Annuity(n, interest_rates, m, age=None, lifetable=None,
 
     return present_value(cash_flows=cash_flows,
                          time_ids=time_ids,
-                         interest_rates=i,
+                         interest_rates=interest_rates,
                          probs=probs,
                          power=power)
-#      out <-
-#        presentValue(
-#          cashFlows = payments, timeIds = times, interestRates = interest, probabilities =
-#            probs,power = power
-#        )
-#
-##function to obtain the annuity
-#axn <-
-#  function(actuarialtable, x, n,i = actuarialtable@interest, m,k = 1, type =
-#             "EV",power = 1,payment = "advance")
-#  {
-#    interest <- i
-#    out <- numeric(1)
-#    if (missing(actuarialtable))
-#      stop("Error! Need an actuarial actuarialtable")
-#    if (missing(x))
-#      stop("Error! Need age!")
-#    
-#    if (x > getOmega(actuarialtable)) {
-#      out = 0
-#      return(out)
-#    }
-#    if (missing(m))
-#      m = 0
-#    if (missing(n))
-#      n = ceiling((getOmega(actuarialtable) + 1 - x - m) * k) / k #n=getOmega(actuarialtable)-x-m Patch by Reinhold
-#    if (n == 0) {
-#      out = 0
-#      return(out)
-#    }
-#    if (any(x < 0,m < 0,n < 0))
-#      stop("Error! Negative parameters")
-#    #computation of quantities, assuming fractional payments
-#    payments = rep(1 / k,n * k)
-#    probs = numeric(n * k)
-#    times = m + seq(from = 0, to = (n - 1 / k),by = 1 / k)
-#    if (payment == "arrears")
-#      times = times + 1 / k
-#    
-#    for (i in 1:length(times))
-#      probs[i] = pxt(actuarialtable, x,times[i])
-#    discounts = (1 + interest) ^ -times #prima era asteriskato
-#    #out<-sum(payments*discounts*probs)
-#    if (type == "EV") {
-#      out <-
-#        presentValue(
-#          cashFlows = payments, timeIds = times, interestRates = interest, probabilities =
-#            probs,power = power
-#        )
-#      #out=.C("add3", x=as.double(payments), y=as.double(discounts),z=as.double(probs),n=as.integer(length(probs)),out=numeric(1))$out
-#    } else if (type == "ST") {
-#      out = rLifeContingencies(
-#        n = 1,lifecontingency = "axn",
-#        object = actuarialtable, x = x,t = n,i = interest, m = m,k = k, payment =
-#          payment
-#      )
-#    }
-#    return(out)
-#  }
