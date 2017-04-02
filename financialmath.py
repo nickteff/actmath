@@ -5,8 +5,8 @@ import numpy as np
 def present_value(cash_flows, time_ids, interest_rates,
                   probs=np.array([1]), power=1):
 
-    for x in [cash_flows, time_ids, interest_rates, probs]:
-        if not isinstance(x, np.ndarray):
+    for item in [cash_flows, time_ids, interest_rates, probs]:
+        if not isinstance(item, np.ndarray):
             raise ValueError('Inputs must be numpy arrays.')
 
     if len(cash_flows) != len(time_ids):
@@ -39,7 +39,7 @@ import pandas as pd
 class Lifetable(object):
     def __init__(self, x, lx, k=1):
         for item in [x, lx]:
-            if not isinstance(x, np.ndarray):
+            if not isinstance(item, np.ndarray):
                 raise ValueError('Inputs must be numpy arrays.')
                 
         '# extends the age list to include 1/k time steps.'
@@ -117,7 +117,8 @@ class Lifetable(object):
 
 def annuity(n, interest_rates, m, age=None, lifetable=None, 
             k=1, power=1, payment='due'):
-    
+    #include error checking on age, n, m, k, payment 
+    #make the default payment immediate
     #computation of quantities, assuming fractional payments
     if (age is not None) & (lifetable is not None):
         if k != lifetable._k:
