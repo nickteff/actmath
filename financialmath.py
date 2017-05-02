@@ -71,7 +71,7 @@ class Lifetable(object):
         else:
             return d[x]
 
-    def ptx(self, t, x=None):
+    def ptx(self, t=1, x=None):
 
         if (t < 0) | (t > self.omega()*self._k):
             raise ValueError('t must be between 1 and omega.')
@@ -89,7 +89,7 @@ class Lifetable(object):
         
         return np.array([self.ptx(i+1) for i in range(self.omega()*self._k)]).T
 
-    def qtx(self, t, x=None):
+    def qtx(self, t=1, x=None):
         
         return 1 - self.ptx(t, x)
 
@@ -97,18 +97,18 @@ class Lifetable(object):
         
         return np.array([self.qtx(i+1) for i in range(self.omega()*self._k)]).T
 
-    def ex(self):
-        
-        return np.array([self.ptx(i+1)
+    def ex(self, x=None):
+
+        return np.array([self.ptx(i+1, x)
                          for i in np.arange(self.omega()*self._k)]).sum(axis=0)
-    
+
     def DataFrame(self):
         
         od = collections.OrderedDict()
         od['x'] = (np.array(self._x))
         od['lx'] = (np.array(self._lx))
-        od['px'] = self.ptx(1)
-        od['qx'] = self.qtx(1)
+        od['px'] = self.ptx()
+        od['qx'] = self.qtx()
         od['dx'] = self.dx()
         od['ex'] = self.ex()
 
