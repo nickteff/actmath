@@ -5,8 +5,8 @@ import numpy as np
 def present_value(cash_flows, time_ids, interest_rates,
                   probs=np.array([1]), power=1):
 
-    for x in [cash_flows, time_ids, interest_rates, probs]:
-        if not isinstance(x, np.ndarray):
+    for item in [cash_flows, time_ids, interest_rates, probs]:
+        if not isinstance(item, np.ndarray):
             raise ValueError('Inputs must be numpy arrays.')
 
     if len(cash_flows) != len(time_ids):
@@ -39,7 +39,7 @@ import pandas as pd
 class Lifetable(object):
     def __init__(self, x, lx, k=1):
         for item in [x, lx]:
-            if not isinstance(x, np.ndarray):
+            if not isinstance(item, np.ndarray):
                 raise ValueError('Inputs must be numpy arrays.')
                 
         '# extends the age list to include 1/k time steps.'
@@ -71,7 +71,7 @@ class Lifetable(object):
         else:
             return d[x]
 
-    def ptx(self, t, x=None):
+    def ptx(self, t=1, x=None):
 
         if (t < 0) | (t > self.omega()*self._k):
             raise ValueError('t must be between 1 and omega.')
@@ -89,7 +89,7 @@ class Lifetable(object):
         
         return np.array([self.ptx(i+1) for i in range(self.omega()*self._k)]).T
 
-    def qtx(self, t, x=None):
+    def qtx(self, t=1, x=None):
         
         return 1 - self.ptx(t, x)
 
@@ -97,18 +97,18 @@ class Lifetable(object):
         
         return np.array([self.qtx(i+1) for i in range(self.omega()*self._k)]).T
 
-    def ex(self):
-        
-        return np.array([self.ptx(i+1)
+    def ex(self, x=None):
+
+        return np.array([self.ptx(i+1, x)
                          for i in np.arange(self.omega()*self._k)]).sum(axis=0)
-    
+
     def DataFrame(self):
         
         od = collections.OrderedDict()
         od['x'] = (np.array(self._x))
         od['lx'] = (np.array(self._lx))
-        od['px'] = self.ptx(1)
-        od['qx'] = self.qtx(1)
+        od['px'] = self.ptx()
+        od['qx'] = self.qtx()
         od['dx'] = self.dx()
         od['ex'] = self.ex()
 
@@ -117,7 +117,8 @@ class Lifetable(object):
 
 def annuity(n, interest_rates, m, age=None, lifetable=None, 
             k=1, power=1, payment='due'):
-    
+    #include error checking on age, n, m, k, payment 
+    #make the default payment immediate
     #computation of quantities, assuming fractional payments
     if (age is not None) & (lifetable is not None):
         if k != lifetable._k:
